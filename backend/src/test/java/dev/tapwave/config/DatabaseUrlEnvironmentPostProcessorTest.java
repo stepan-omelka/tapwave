@@ -21,6 +21,22 @@ class DatabaseUrlEnvironmentPostProcessorTest {
     }
 
     @Test
+    void enforcesNeonsChannelBindingUnderPgjdbcsName() {
+        var properties = DatabaseUrlEnvironmentPostProcessor.toDataSourceProperties(
+                "postgresql://u:p@ep-x.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+
+        assertThat(properties).containsEntry("spring.datasource.url",
+                "jdbc:postgresql://ep-x.eu-central-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require");
+    }
+
+    @Test
+    void aPlusInThePasswordStaysAPlus() {
+        var properties = DatabaseUrlEnvironmentPostProcessor.toDataSourceProperties("postgresql://u:a+b%2Bc@host/db");
+
+        assertThat(properties).containsEntry("spring.datasource.password", "a+b+c");
+    }
+
+    @Test
     void keepsExplicitPort() {
         var properties = DatabaseUrlEnvironmentPostProcessor.toDataSourceProperties("postgres://app:pw@localhost:5433/game");
 

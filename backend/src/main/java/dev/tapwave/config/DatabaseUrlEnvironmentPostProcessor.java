@@ -3,7 +3,9 @@ package dev.tapwave.config;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -42,14 +44,26 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
         }
         int separator = userInfo.indexOf(':');
         String port = uri.getPort() == -1 ? "" : ":" + uri.getPort();
-        String query = uri.getRawQuery() == null ? "" : "?" + uri.getRawQuery();
         return Map.of(
-                "spring.datasource.url", "jdbc:postgresql://" + uri.getHost() + port + uri.getRawPath() + query,
+                "spring.datasource.url", "jdbc:postgresql://" + uri.getHost() + port + uri.getRawPath() + jdbcQuery(uri.getRawQuery()),
                 "spring.datasource.username", decode(userInfo.substring(0, separator)),
                 "spring.datasource.password", decode(userInfo.substring(separator + 1)));
     }
 
+    /** Neon's URL uses libpq's {@code channel_binding}; pgjdbc only knows {@code channelBinding} and ignores the other. */
+    private static String jdbcQuery(String rawQuery) {
+        if (rawQuery == null) {
+            return "";
+        }
+        return "?" + Arrays.stream(rawQuery.split("&"))
+                .map(parameter -> parameter.startsWith("channel_binding=")
+                        ? "channelBinding=" + parameter.substring("channel_binding=".length())
+                        : parameter)
+                .collect(Collectors.joining("&"));
+    }
+
+    /** Percent-decodes; a literal {@code +} stays a plus (URLDecoder would turn it into a space). */
     private static String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
     }
 }
