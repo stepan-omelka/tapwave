@@ -6,7 +6,7 @@ A browser rhythm game in the circle-clicking genre: hit circles as their approac
 
 Tapwave is an original game. Its gameplay is inspired by the genre that osu! made popular, but it has its own name, visuals and generated maps, and it uses no assets from any other game. Its music is either synthesised live in the browser or openly licensed (CC0 / CC BY 4.0) — see [CREDITS.md](CREDITS.md).
 
-**Stack:** Angular 22 (zoneless, signals, Canvas 2D, Web Audio) · Spring Boot 4.1 / Java 21 · PostgreSQL 17 · Flyway · Testcontainers · Vitest.
+**Stack:** Angular 22 (zoneless, signals, Canvas 2D, Web Audio) · Spring Boot 4.1 / Java 21 · PostgreSQL 18 · Flyway · Testcontainers · Vitest.
 
 ## Run it locally
 
@@ -134,10 +134,10 @@ The root `Dockerfile` builds the Angular app into the Spring Boot jar, so one se
 
 1. **Neon:** create a project in AWS Europe Central (Frankfurt) and take the **direct** connection string (pooling off): Flyway needs a session, and Neon's pooler runs in transaction mode. With the CLI:
    ```bash
-   neon projects create --name tapwave --region-id aws-eu-central-1 -o json | jq -r .project.id
+   neon projects create --name tapwave --region-id aws-eu-central-1 --pg-version 18 -o json | jq -r .project.id
    { printf 'DATABASE_URL_UNPOOLED='; neon connection-string --project-id <id>; } >> .env.local   # git-ignored
    ```
-2. **Render:** give the Render GitHub app access to this repository first (otherwise pushes don't redeploy), then *New → Blueprint* and pick it. Render reads `render.yaml` and asks for `DATABASE_URL`: paste the direct Neon connection string, `postgresql://user:password@host/db?sslmode=require`. `DatabaseUrlEnvironmentPostProcessor` turns it into Spring's JDBC URL, user and password (locally `DB_URL`, `DB_USER` and `DB_PASSWORD` still apply).
+2. **Render:** give the Render GitHub app access to this repository first (otherwise pushes don't redeploy), then *New → Blueprint* and pick it. Render reads `render.yaml` and asks for `DATABASE_URL`: paste the direct Neon connection string, `postgresql://user:password@host/db?sslmode=require`, before approving the sync (an approved sync with an empty value deploys without a database). `DatabaseUrlEnvironmentPostProcessor` turns it into Spring's JDBC URL, user and password (locally `DB_URL`, `DB_USER` and `DB_PASSWORD` still apply).
 3. On its first start the app runs the Flyway migrations and generates the maps. It runs at [tapwave.onrender.com](https://tapwave.onrender.com), and every push to `main` redeploys.
 
 How it stays within the free tiers:
@@ -168,4 +168,8 @@ The project was built with Claude Code (Opus 5.5), including research, code, tes
 5. **Bugs only the review agent found** (all fixed): the game clock jumped forward after every pause (two different audio clocks were mixed), "press any key to start" ignored every key because the Start button had focus, a rejected submission left its token reusable for probing the validator, the results screen and the leaderboard could disagree on rank for tied scores, an `AudioContext` leaked when audio failed to load, and very short sliders could force a head miss while the head's timing window was still open.
 6. **The beat finder locked onto the off-beats.** The first version of `tools/beatgrid.py` found the right tempo for all four licensed songs but put the beat half a beat late on three of them: hi-hats and snares outweigh the kick drum in a full-band onset sum. Nothing in its own output looked wrong (onsets fitted the grid within 1–2 ms, because off-beats are on the grid too). It was caught by noticing that the reported phases were exactly half a beat after each song's first sound, and fixed by taking the half-beat that the song's first onset lands on. It also labelled the two chiptunes as 90.5 and 105.5 BPM; the kick/snare pattern shows they are 181 and 211.
 7. **Two first drafts of onset mapping that looked fine in code.** The rhythm export first reused the beat tracker's envelope, which measures rises relative to the local average, so sustained pads in a breakdown scored like drum hits; looking at the exported digits for a bar known to be silent showed it, and only real onset peaks count now. The first note picker took the strongest onsets song-wide, which filled loud sections of the Normal map with whole bars of eighths; a preview of notes per bar showed it, and a per-bar cap and a limit on notes in a row fixed it.
-8. **Limits it can't code away:** the anti-cheat section above is honest about what a browser game can and cannot guarantee.
+8. **Three deploy mistakes.**
+   - The converter from Neon's `postgresql://` URL to JDBC copied `channel_binding=require` as it was. That is libpq's name; the PostgreSQL JDBC driver calls it `channelBinding` and ignores parameters it doesn't know, so channel binding was only preferred, not required, and nothing failed. It also decoded the password with `URLDecoder`, which turns a `+` into a space. Both were found in [cookie-clicker](https://github.com/stepan-omelka/cookie-clicker), which shares this code, then fixed here and checked against Neon.
+   - It created the Neon project without `--pg-version`, so production got Neon's default, PostgreSQL 18, while Docker Compose and the Testcontainers tests ran 17. Both use 18 now.
+   - The first deploy started without `DATABASE_URL` and failed trying to reach `localhost:5433`: the AI's handover steps had the Blueprint sync approved before the value was pasted in. The variable was added afterwards in the dashboard.
+9. **Limits it can't code away:** the anti-cheat section above is honest about what a browser game can and cannot guarantee.
