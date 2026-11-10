@@ -1,0 +1,131 @@
+<canvas
+  #canvas
+  class="stage"
+  [class.hide-cursor]="state() === 'playing' && !autoplay()"
+  aria-label="Game playfield"
+  role="img"
+></canvas>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="overlay" role="status"><p class="big">Loading…</p></div>
+  }
+  @case ('ready') {
+    <div class="overlay" (click)="begin()">
+      <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ready-title">
+        <p class="eyebrow">{{ detail()?.beatmap?.difficultyName }} · {{ detail()?.beatmap?.bpm | number: '1.0-1' }} BPM</p>
+        <h1 id="ready-title">{{ detail()?.beatmap?.title }}</h1>
+        <p class="muted">{{ detail()?.beatmap?.artist }}</p>
+        @if (autoplay()) {
+          <p>Sit back and watch a perfect run.</p>
+        } @else {
+          <ul class="controls">
+            <li><kbd>Z</kbd> <kbd>X</kbd> or mouse buttons — hit</li>
+            <li>Hold and follow the ball on sliders</li>
+            <li>Hold and circle the cursor on spinners</li>
+            <li><kbd>Esc</kbd> — pause</li>
+          </ul>
+        }
+        <button type="button" class="btn primary" data-autofocus (click)="begin(); $event.stopPropagation()">
+          {{ autoplay() ? 'Watch' : 'Start' }}
+        </button>
+        <p class="muted small">or press any key</p>
+      </div>
+    </div>
+  }
+  @case ('starting') {
+    <div class="overlay" role="status"><p class="big">Get ready…</p></div>
+  }
+  @case ('paused') {
+    <div class="overlay">
+      <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <h1 id="pause-title">Paused</h1>
+        <div class="buttons">
+          <button type="button" class="btn primary" data-autofocus (click)="resume()">Resume</button>
+          <button type="button" class="btn" (click)="retry()">Retry <kbd>R</kbd></button>
+          <button type="button" class="btn" (click)="quit()">Quit</button>
+        </div>
+      </div>
+    </div>
+  }
+  @case ('failed') {
+    <div class="overlay failed">
+      <div class="panel" role="dialog" aria-modal="true" aria-labelledby="failed-title">
+        <h1 id="failed-title">Out of HP</h1>
+        <p class="muted">Too many misses in a row. Failed plays are not ranked.</p>
+        <div class="buttons">
+          <button type="button" class="btn primary" data-autofocus (click)="retry()">Retry <kbd>R</kbd></button>
+          <button type="button" class="btn" (click)="quit()">Back to tracks</button>
+        </div>
+      </div>
+    </div>
+  }
+  @case ('submitting') {
+    <div class="overlay" role="status"><p class="big">Verifying score on the server…</p></div>
+  }
+  @case ('results') {
+    @if (result(); as r) {
+      <div class="overlay">
+        <div class="panel results" role="dialog" aria-modal="true" aria-labelledby="results-title">
+          <h1 id="results-title" class="visually-hidden">Results</h1>
+          <div class="result-head">
+            <span [class]="'grade-letter grade grade-' + r.grade">{{ r.grade }}</span>
+            <div>
+              <p class="eyebrow">{{ detail()?.beatmap?.title }} · {{ detail()?.beatmap?.difficultyName }}</p>
+              <p class="score">{{ formatScore(r.totalScore) }}</p>
+              <div class="badges">
+                @if (r.verified) {
+                  <span class="badge ok">✓ Verified by server</span>
+                  <span class="badge">Rank #{{ r.rank }}</span>
+                }
+                @if (r.personalBest) {
+                  <span class="badge pb">New personal best</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <dl class="numbers">
+            <div><dt>Accuracy</dt><dd>{{ r.accuracy | number: '1.2-2' }}%</dd></div>
+            <div><dt>Max combo</dt><dd>{{ r.maxCombo }}x / {{ detail()?.beatmap?.maxCombo }}x</dd></div>
+            <div><dt class="j300">300</dt><dd>{{ r.count300 }}</dd></div>
+            <div><dt class="j100">100</dt><dd>{{ r.count100 }}</dd></div>
+            <div><dt class="j50">50</dt><dd>{{ r.count50 }}</dd></div>
+            <div><dt class="jmiss">Miss</dt><dd>{{ r.countMiss }}</dd></div>
+          </dl>
+
+          @if (r.meanError !== null) {
+            <p class="muted small">
+              Average timing: {{ r.meanError | number: '1.0-1' }} ms
+              {{ r.meanError > 0 ? 'late' : r.meanError < 0 ? 'early' : '' }}
+            </p>
+          }
+          @if (r.note) {
+            <p class="note" role="alert">{{ r.note }}</p>
+          }
+          <div class="buttons">
+            <button type="button" class="btn primary" data-autofocus (click)="retry()">Retry <kbd>R</kbd></button>
+            <button type="button" class="btn" (click)="quit()">Back to tracks</button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+  @case ('error') {
+    <div class="overlay">
+      <div class="panel" role="alertdialog" aria-modal="true" aria-labelledby="error-title">
+        <h1 id="error-title">Something went wrong</h1>
+        <p class="muted">{{ message() }}</p>
+        <button type="button" class="btn primary" data-autofocus (click)="quit()">Back to tracks</button>
+      </div>
+    </div>
+  }
+}
+
+@if (state() === 'playing' && canSkip()) {
+  <button type="button" class="btn skip" (click)="skip()">Skip intro <kbd>Space</kbd></button>
+}
+
+@if (state() === 'playing' && message()) {
+  <p class="toast" role="status">{{ message() }}</p>
+}

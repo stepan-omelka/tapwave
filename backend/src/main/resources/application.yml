@@ -1,0 +1,174 @@
+spring:
+  application:
+    name: tapwave
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/tapwave}
+    username: ${DB_USER:tapwave}
+    password: ${DB_PASSWORD:tapwave}
+    # DATABASE_URL (postgresql://user:password@host/db) overrides these three; see DatabaseUrlEnvironmentPostProcessor.
+    hikari:
+      # Close idle connections after a minute, so a serverless database (Neon) can scale to zero between players.
+      minimum-idle: 0
+      idle-timeout: 60000
+      keepalive-time: 0
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8081}
+  compression:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      # /actuator/health/liveness answers without touching the database: the host's health check uses it.
+      probes:
+        enabled: true
+
+tapwave:
+  play:
+    # A play token is valid this long after it was issued.
+    max-age: PT2H
+    # A submission is rejected if less than this share of the map's playable
+    # length passed between issuing the token and submitting the score.
+    min-duration-ratio: 0.9
+  # Maps generated on startup when their slug is not in the database yet.
+  # To add your own song: put the file into frontend/public/audio/, measure its
+  # BPM and first downbeat with tools/beatgrid.py (--export writes its rhythm
+  # file) and add an entry with audio-url, bpm, offset-ms, rhythm and the
+  # song's license (see README).
+  seed:
+    maps:
+      - slug: morning-static
+        title: Morning Static
+        artist: Tapwave Synth Unit
+        difficulty-name: Warm-up
+        bpm: 104
+        bars: 18
+        level: 1
+        circle-size: 3
+        approach-rate: 4
+        overall-difficulty: 3
+        hp-drain: 3
+        seed: 11
+      - slug: neon-drift
+        title: Neon Drift
+        artist: Tapwave Synth Unit
+        difficulty-name: Normal
+        bpm: 124
+        bars: 34
+        level: 2
+        circle-size: 4
+        approach-rate: 6.5
+        overall-difficulty: 5
+        hp-drain: 4
+        seed: 2024
+      - slug: overclock
+        title: Overclock
+        artist: Tapwave Synth Unit
+        difficulty-name: Hard
+        bpm: 148
+        bars: 42
+        level: 3
+        circle-size: 4
+        approach-rate: 8
+        overall-difficulty: 7
+        hp-drain: 5
+        seed: 777
+      - slug: hyperlane
+        title: Hyperlane
+        artist: Tapwave Synth Unit
+        difficulty-name: Insane
+        bpm: 172
+        bars: 50
+        level: 4
+        circle-size: 4.2
+        approach-rate: 9.2
+        overall-difficulty: 8.5
+        hp-drain: 6
+        seed: 9001
+      # Openly licensed songs; credits in CREDITS.md. Beat grids and rhythm files
+      # from tools/beatgrid.py: notes go where each song has onsets.
+      - slug: level-1-easy
+        title: Level 1
+        artist: Juhani Junkala
+        difficulty-name: Easy
+        audio-url: /audio/junkala-level-1.mp3
+        source-url: https://opengameart.org/content/5-chiptunes-action
+        license: CC0 1.0
+        license-url: https://creativecommons.org/publicdomain/zero/1.0/
+        bpm: 181
+        offset-ms: 28
+        rhythm: rhythm/junkala-level-1.txt
+        bars: 57            # ends before the fade-out at 74 s
+        level: 1
+        circle-size: 3.5
+        approach-rate: 5
+        overall-difficulty: 4
+        hp-drain: 3
+        seed: 181
+      - slug: voxel-revolution-normal
+        title: Voxel Revolution
+        artist: Kevin MacLeod
+        difficulty-name: Normal
+        audio-url: /audio/macleod-voxel-revolution.mp3
+        source-url: https://incompetech.com/music/royalty-free/index.html?isrc=USUAN2000025
+        license: CC BY 4.0
+        license-url: https://creativecommons.org/licenses/by/4.0/
+        bpm: 121.998
+        offset-ms: 12       # beat at 0.3 ms + 12 ms: Chrome decodes this MP3 529 samples later than afconvert
+        rhythm: rhythm/macleod-voxel-revolution.txt
+        bars: 64
+        breaks: [56-61]     # the breakdown at 1:50 has no beat, only a bass line
+        level: 2
+        circle-size: 4
+        approach-rate: 6
+        overall-difficulty: 5
+        hp-drain: 4
+        seed: 122
+      - slug: brain-dance-hard
+        title: Brain Dance
+        artist: Kevin MacLeod
+        difficulty-name: Hard
+        audio-url: /audio/macleod-brain-dance.mp3
+        source-url: https://incompetech.com/music/royalty-free/index.html?isrc=USUAN2300006
+        license: CC BY 4.0
+        license-url: https://creativecommons.org/licenses/by/4.0/
+        bpm: 124
+        offset-ms: 499      # bar line at 487.2 ms + 12 ms MP3 decoder delay in Chrome (see Voxel Revolution)
+        rhythm: rhythm/macleod-brain-dance.txt
+        bars: 65            # ends at the climax before the long breakdown at 2:06
+        breaks: [28-29]     # a breather in the quiet passage
+        level: 3
+        circle-size: 4
+        approach-rate: 8
+        overall-difficulty: 6
+        hp-drain: 5
+        seed: 124
+      - slug: level-3-hard
+        title: Level 3
+        artist: Juhani Junkala
+        difficulty-name: Hard
+        audio-url: /audio/junkala-level-3.mp3
+        source-url: https://opengameart.org/content/5-chiptunes-action
+        license: CC0 1.0
+        license-url: https://creativecommons.org/publicdomain/zero/1.0/
+        bpm: 211
+        offset-ms: 28
+        rhythm: rhythm/junkala-level-3.txt
+        bars: 77            # ends before the fade-out at 87 s
+        level: 2
+        circle-size: 4
+        approach-rate: 9
+        overall-difficulty: 7
+        hp-drain: 5
+        seed: 211

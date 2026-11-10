@@ -1,0 +1,18 @@
+# Build output and dependencies
+node_modules/
+dist/
+target/
+.angular/
+out-tsc/
+
+# Secrets: Neon CLI and env files (DATABASE_URL lives in .env.local)
+.env
+.env.*
+.neon
+
+# Local tooling
+.idea/
+/.vscode/
+.DS_Store
+*.log
+__pycache__/

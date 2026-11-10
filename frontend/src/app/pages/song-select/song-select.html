@@ -1,0 +1,199 @@
+<header class="topbar">
+  <div class="logo">
+    <span class="logo-mark" aria-hidden="true"></span>
+    <span class="logo-text">TAPWAVE</span>
+  </div>
+
+  <div class="player">
+    <label for="player-name">Player</label>
+    <input
+      #nameInput
+      id="player-name"
+      type="text"
+      maxlength="24"
+      autocomplete="nickname"
+      placeholder="Your name"
+      [value]="settings.playerName()"
+      (input)="onNameInput($event)"
+      (blur)="nameTouched.set(true)"
+      [attr.aria-invalid]="showNameError()"
+      aria-describedby="player-name-hint"
+    />
+    <span id="player-name-hint" class="hint" [class.error]="showNameError()">
+      @if (showNameError()) {
+        1–24 letters, digits, spaces or _ . -
+      } @else {
+        Shown on the leaderboard
+      }
+    </span>
+  </div>
+
+  <button
+    type="button"
+    class="btn"
+    (click)="settingsOpen.set(!settingsOpen())"
+    [attr.aria-expanded]="settingsOpen()"
+    aria-controls="settings-panel"
+  >
+    Settings
+  </button>
+</header>
+
+@if (settingsOpen()) {
+  <section id="settings-panel" class="settings" aria-label="Settings">
+    <label>
+      <span>Volume <output>{{ settings.volume() * 100 | number: '1.0-0' }}%</output></span>
+      <input type="range" min="0" max="1" step="0.05" [value]="settings.volume()" (input)="onRange('volume', $event)" />
+    </label>
+    <label>
+      <span>Audio offset <output>{{ settings.offsetMs() }} ms</output></span>
+      <input type="range" min="-150" max="150" step="5" [value]="settings.offsetMs()" (input)="onRange('offsetMs', $event)" />
+      <small>Raise it if your hits land late on every map (e.g. Bluetooth headphones).</small>
+    </label>
+    <label>
+      <span>Background dim <output>{{ settings.backgroundDim() * 100 | number: '1.0-0' }}%</output></span>
+      <input type="range" min="0" max="1" step="0.05" [value]="settings.backgroundDim()" (input)="onRange('backgroundDim', $event)" />
+    </label>
+  </section>
+}
+
+<main class="layout">
+  <section class="maps" aria-labelledby="maps-heading">
+    <h2 id="maps-heading">Tracks</h2>
+    @if (beatmaps.isLoading()) {
+      <p class="muted">Loading tracks…</p>
+    } @else if (beatmaps.error()) {
+      <p class="error-box" role="alert">Could not reach the server. Is the backend running on port 8081?</p>
+    }
+    <ul class="map-list">
+      @for (map of beatmaps.value(); track map.id; let i = $index) {
+        <li>
+          <button
+            type="button"
+            class="map-card"
+            [class.active]="map.id === selected()?.id"
+            [style.--accent]="accents[i % accents.length]"
+            [attr.aria-pressed]="map.id === selected()?.id"
+            (click)="select(map)"
+            (dblclick)="play(false)"
+          >
+            <span class="map-title">{{ map.title }}</span>
+            <span class="map-meta">{{ map.artist }}</span>
+            <span class="map-tags">
+              <span class="tag">{{ map.difficultyName }}</span>
+              <span class="tag">★ {{ map.starRating | number: '1.2-2' }}</span>
+              <span class="tag">{{ map.bpm | number: '1.0-1' }} BPM</span>
+              <span class="tag">{{ formatDuration(map.durationMs) }}</span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+
+  @if (selected(); as map) {
+    <section class="detail" aria-labelledby="detail-heading">
+      <div class="detail-head">
+        <div>
+          <p class="eyebrow">{{ map.difficultyName }} · mapped by {{ map.mapper }}</p>
+          <h1 id="detail-heading">{{ map.title }}</h1>
+          <p class="muted">{{ map.artist }}</p>
+          <p class="credit">
+            @if (map.audioUrl) {
+              Music:
+              @if (map.audioSourceUrl) {
+                <a [href]="map.audioSourceUrl" target="_blank" rel="noopener">“{{ map.title }}”</a>
+              } @else {
+                “{{ map.title }}”
+              }
+              by {{ map.artist }} ·
+              @if (map.audioLicenseUrl) {
+                <a [href]="map.audioLicenseUrl" target="_blank" rel="noopener license">{{ map.audioLicense }}</a>
+              } @else {
+                {{ map.audioLicense }}
+              }
+            } @else {
+              Music: original, synthesised live in your browser
+            }
+          </p>
+        </div>
+        <div class="stars" [attr.aria-label]="'Difficulty ' + (map.starRating | number: '1.2-2') + ' stars'">
+          @for (fill of stars(map.starRating); track $index) {
+            <span class="star" [style.--fill]="fill" aria-hidden="true"></span>
+          }
+        </div>
+      </div>
+
+      <dl class="stats">
+        @for (stat of stats(); track stat.key) {
+          <div class="stat">
+            <dt><abbr [title]="stat.label">{{ stat.key }}</abbr></dt>
+            <dd>
+              <span class="bar" aria-hidden="true"><span [style.width.%]="stat.value * 10"></span></span>
+              <span class="value">{{ stat.value | number: '1.0-1' }}</span>
+            </dd>
+          </div>
+        }
+        <div class="stat plain">
+          <dt>Objects</dt>
+          <dd>{{ map.objectCount }} · max combo {{ map.maxCombo }}x</dd>
+        </div>
+      </dl>
+
+      <div class="actions">
+        <button type="button" class="btn primary play" (click)="play(false)">Play</button>
+        <button type="button" class="btn" (click)="play(true)">Watch autoplay</button>
+        <span class="muted keys-hint">Z / X or mouse buttons to hit · Esc pauses</span>
+      </div>
+
+      <h2 class="board-heading">Leaderboard</h2>
+      @if (leaderboard.isLoading() && leaderboard.value().length === 0) {
+        <p class="muted">Loading scores…</p>
+      } @else if (leaderboard.value().length === 0) {
+        <p class="muted">No scores yet — be the first.</p>
+      } @else {
+        <table class="board">
+          <caption class="visually-hidden">Best score per player on {{ map.title }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Player</th>
+              <th scope="col" class="num">Score</th>
+              <th scope="col" class="num">Accuracy</th>
+              <th scope="col" class="num">Combo</th>
+              <th scope="col">Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of leaderboard.value(); track entry.scoreId) {
+              <tr [class.me]="entry.playerName.toLowerCase() === settings.playerName().trim().toLowerCase()">
+                <td>{{ entry.rank }}</td>
+                <td>{{ entry.playerName }}</td>
+                <td class="num mono">{{ entry.totalScore | number }}</td>
+                <td class="num mono">{{ entry.accuracy | number: '1.2-2' }}%</td>
+                <td class="num mono">{{ entry.maxCombo }}x</td>
+                <td><span class="grade" [class]="'grade grade-' + entry.grade">{{ entry.grade }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</main>
+
+@if (recent.value().length > 0) {
+  <footer class="recent" aria-labelledby="recent-heading">
+    <h2 id="recent-heading">Recent plays</h2>
+    <ul>
+      @for (score of recent.value(); track score.scoreId) {
+        <li>
+          <span class="grade" [class]="'grade grade-' + score.grade">{{ score.grade }}</span>
+          <strong>{{ score.playerName }}</strong>
+          <span class="muted">{{ score.beatmapTitle }} [{{ score.difficultyName }}]</span>
+          <span class="mono">{{ score.totalScore | number }}</span>
+        </li>
+      }
+    </ul>
+  </footer>
+}

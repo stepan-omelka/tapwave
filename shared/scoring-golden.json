@@ -1,0 +1,37 @@
+{
+  "description": "Golden scoring cases. Read by backend ScoreCalculatorGoldenTest and frontend score-keeper.spec.ts so both implementations must agree on every number.",
+  "overallDifficulty": 5,
+  "hpDrain": 5,
+  "hitObjects": [
+    { "type": "circle", "time": 1000, "x": 100, "y": 100, "newCombo": true, "comboNumber": 1, "colorIndex": 0 },
+    {
+      "type": "slider", "time": 2000, "x": 100, "y": 100, "newCombo": false, "comboNumber": 2, "colorIndex": 0, "endTime": 3000,
+      "slider": {
+        "curve": "linear",
+        "points": [ { "x": 100, "y": 100 }, { "x": 200, "y": 100 } ],
+        "slides": 1,
+        "spanDuration": 1000,
+        "parts": [ { "time": 2500, "kind": "tick" }, { "time": 3000, "kind": "tail" } ]
+      }
+    },
+    { "type": "circle", "time": 3500, "x": 200, "y": 200, "newCombo": false, "comboNumber": 3, "colorIndex": 0 },
+    { "type": "spinner", "time": 4000, "x": 256, "y": 192, "newCombo": true, "comboNumber": 0, "colorIndex": 1, "endTime": 6000 }
+  ],
+  "cases": [
+    {
+      "name": "perfect play",
+      "results": [ { "offset": 0 }, { "offset": 0, "parts": [true, true] }, { "offset": 0 }, { "spins": 3.5 } ],
+      "expected": { "totalScore": 1426, "maxCombo": 6, "count300": 4, "count100": 0, "count50": 0, "countMiss": 0, "accuracy": 100, "grade": "SS", "failed": false }
+    },
+    {
+      "name": "mixed play with a missed slider head and a missed spinner",
+      "results": [ { "offset": 70 }, { "offset": null, "parts": [true, false] }, { "offset": -10 }, { "spins": 0.5 } ],
+      "expected": { "totalScore": 474, "maxCombo": 2, "count300": 1, "count100": 1, "count50": 1, "countMiss": 1, "accuracy": 37.5, "grade": "D", "failed": false }
+    },
+    {
+      "name": "dropped tick, late circle and bonus spins",
+      "results": [ { "offset": -30 }, { "offset": 20, "parts": [false, true] }, { "offset": 105 }, { "spins": 6.2 } ],
+      "expected": { "totalScore": 1040, "maxCombo": 3, "count300": 2, "count100": 1, "count50": 1, "countMiss": 0, "accuracy": 62.5, "grade": "D", "failed": false }
+    }
+  ]
+}

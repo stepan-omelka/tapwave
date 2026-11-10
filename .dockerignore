@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+**/.DS_Store
+**/node_modules
+frontend/dist
+frontend/.angular
+backend/target
+tools
+shared
+.env*
+.neon

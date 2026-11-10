@@ -1,0 +1,115 @@
+:root {
+  color-scheme: dark;
+  --bg: #05070f;
+  --panel: rgba(15, 22, 44, 0.78);
+  --panel-strong: #111a33;
+  --border: rgba(148, 163, 184, 0.18);
+  --text: #f1f5f9;
+  --muted: #9aa8bd;
+  --cyan: #38e8ff;
+  --amber: #ffb347;
+  --violet: #a78bfa;
+  --mint: #4ade80;
+  --red: #f87171;
+  --radius: 14px;
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(56, 232, 255, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(167, 139, 250, 0.14), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.6rem 1.1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background 120ms, transform 120ms;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, var(--cyan), #3b82f6);
+    border-color: transparent;
+    color: #04121a;
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.grade {
+  font-weight: 800;
+
+  &.grade-SS,
+  &.grade-S {
+    color: var(--amber);
+  }
+
+  &.grade-A {
+    color: var(--mint);
+  }
+
+  &.grade-B {
+    color: var(--cyan);
+  }
+
+  &.grade-C {
+    color: var(--violet);
+  }
+
+  &.grade-D {
+    color: var(--red);
+  }
+}
