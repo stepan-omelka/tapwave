@@ -1,6 +1,6 @@
 # Tapwave
 
-**Play it: [tapwave.onrender.com](https://tapwave.onrender.com)** — free hosting, so the first visit after a quiet spell takes about a minute while the server starts ([how it's deployed](#deployment)).
+**Play it: [tapwave.onrender.com](https://tapwave.onrender.com)** — free hosting, so the first visit after a quiet spell waits a minute or two while the server starts ([how it's deployed](#deployment)).
 
 A browser rhythm game in the circle-clicking genre: hit circles as their approach ring closes, follow sliders, spin spinners — keep the combo, keep your HP up. Scores go to a server-verified leaderboard.
 
@@ -142,7 +142,7 @@ The root `Dockerfile` builds the Angular app into the Spring Boot jar, so one se
 
 How it stays within the free tiers:
 
-- **Render** stops the service after 15 minutes without traffic; the next visit waits about a minute while it starts. There is no keep-awake ping: the workspace's 750 free instance hours a month are shared with another always-on service.
+- **Render** stops the service after 15 minutes without traffic; the next visit waits a minute or two while it starts (Spring needs about 70 s on the free 0.1 CPU). There is no keep-awake ping: the workspace's 750 free instance hours a month are shared with another always-on service.
 - Render's health check uses `/actuator/health/liveness`, which never touches the database (`/actuator/health` does, and hangs for 30 s when the database is asleep or down).
 - **Bandwidth** is the tightest limit: the free workspace includes 5 GB of outbound traffic a month for all its services, and the songs are 1.5–6.6 MB each. Hashed bundles are cached for a year, songs for 30 days, and text responses are gzipped, so a returning player downloads almost nothing.
 - **Neon** scales to zero after 5 idle minutes. Hikari closes idle connections after a minute (`minimum-idle: 0`), so the database sleeps whenever nobody plays and stays far below the free plan's 100 CU-hours per project a month (about 400 hours at the smallest size). Free storage is 1 GB per project; the eight maps and their scores use a few MB.
