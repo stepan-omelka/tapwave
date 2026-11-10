@@ -1,59 +1,77 @@
-# Frontend
+# `frontend/`: the Angular app and the game
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.6.
+An Angular SPA with two lazy-loaded pages: the song select (`/`) and the play page (`/play/:id`).
+The game itself is plain TypeScript in `src/app/game/`, with no Angular inside, so it can run headless
+in tests. It talks to the [backend](../backend/README.md) under `/api`; in production the backend also
+serves this build.
 
-## Development server
+## 🧱 Structure
 
-To start a local development server, run:
+| Path                        | Holds                                                                                                     |
+| :-------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `src/app/core/`             | `ApiService` (calls that change state), `models.ts` (the API's types), `SettingsService`, formatting helpers |
+| `src/app/pages/song-select/` | the map list, leaderboard, recent scores and settings                                                    |
+| `src/app/pages/play/`       | the play page: a state machine (`PlayState`) around the engine, its overlays and the score submission |
+| `src/app/game/`             | the game: `engine.ts`, `renderer.ts`, `audio.ts`, `rules.ts`, `score-keeper.ts`, `slider-path.ts`, `autoplay.ts` |
 
-```bash
-ng serve
-```
+- Angular conventions here: standalone components, no zone.js, signals for state, `@Service()` for
+  services, and `httpResource` for read-only lists in the pages. Component inputs are bound from route
+  and query parameters (`withComponentInputBinding`).
+- **`core/models.ts` is written by hand** from the backend's records, with no code generation; the
+  full list is in [rules implemented twice](../ARCHITECTURE.md#️-rules-implemented-twice).
+- **A new route needs the backend too.** In production the backend's `SpaController` forwards only
+  `/play/{id}` to `index.html`, and `WebCacheConfig` marks only `/`, `/index.html` and `/play/*` as
+  no-cache. Without both, a reload or a shared link to the new route is a 404 in production, while
+  `ng serve` works fine.
+- Player settings (name, volume, audio offset, background dim) live in `localStorage` under
+  `tapwave.settings`.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 🎮 The game engine
 
-## Code scaffolding
+- **The `AudioContext` clock is the only clock.** Song time comes from `AudioEngine.timeMs()`, which
+  corrects for output latency; pausing suspends the context, which freezes the music and the clock
+  together. Never derive song time from `performance.now()` or frame counts.
+- **Objects are judged strictly in order**: an object cannot be hit before every earlier one is
+  resolved, and slider parts are scored only after their head. That is how the live score stays equal
+  to the server's recomputation, which processes results in the same order.
+- **A hit is back-dated to its event's `timeStamp`**, so time spent waiting for the handler does not
+  count as lateness.
+- **Keys are matched by physical position** (`KeyZ`, `KeyX`), so QWERTZ and other layouts work.
+- **Audio may only start from a user gesture**: the play page starts or resumes it inside the click or
+  key handler, not after an `await`.
+- **The synth tracks cannot seek**: they are scheduled bar by bar from the start, so only songs from
+  audio files offer the intro skip.
+- The playfield is 512 × 384 units inside a 640 × 480 virtual screen; the renderer scales that to the
+  canvas and holds no game state besides the cursor trail.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+The scoring rules in `rules.ts` and `score-keeper.ts`, and the live judgement in `engine.ts`, mirror
+the backend's; see
+[rules implemented twice](../ARCHITECTURE.md#️-rules-implemented-twice) before changing them. In dev
+mode the play page logs a console warning when the live, recomputed and server scores differ, and
+exposes the running engine as `window.tapwave`.
 
-```bash
-ng generate component component-name
-```
+## 💻 Development
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+| Command                          | What it does                                                                                 |
+| :------------------------------- | :------------------------------------------------------------------------------------------- |
+| `npm install`                    | install dependencies (npm 11, Node 24)                                                       |
+| `npm start`                      | dev server on <http://localhost:4201>, proxying `/api` to the backend on `:8081` (`proxy.conf.json`) |
+| `npx ng build`                   | production build into `dist/frontend/browser/`, with type checks and bundle budgets         |
+| `npx prettier --write <files>`   | format the files you changed, see [code style](../CONTRIBUTING.md#code-style)                 |
 
-```bash
-ng generate --help
-```
+Open `/play/<id>?auto=1` to watch autoplay on a map. Everything else follows
+[`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
-## Building
+## 🧪 Testing
 
-To build the project run:
+| Spec                    | Covers                                                                                                      |
+| :---------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `score-keeper.spec.ts`  | the scoring rules and every golden case shared with the backend                                            |
+| `engine.spec.ts`        | the real engine with a fake canvas and audio clock: autoplay and sloppy scripted players score the same live and recomputed; the intro skip |
+| `slider-path.spec.ts`   | slider curves and the ball's position along them                                                            |
 
-```bash
-ng build
-```
+- Run them once with `npx ng test --watch=false`.
+- Rendering, audio and input have no automated tests; check them by playing in a browser.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The layers and the golden cases are described in
+[`docs/testing-strategy.md`](../docs/testing-strategy.md).
