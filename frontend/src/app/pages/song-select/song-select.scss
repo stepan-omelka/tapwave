@@ -25,7 +25,10 @@
   height: 34px;
   border-radius: 50%;
   border: 5px solid var(--cyan);
-  box-shadow: 0 0 18px rgba(56, 232, 255, 0.55), inset 0 0 0 6px var(--bg), inset 0 0 0 20px var(--amber);
+  box-shadow:
+    0 0 18px rgba(56, 232, 255, 0.55),
+    inset 0 0 0 6px var(--bg),
+    inset 0 0 0 20px var(--amber);
 }
 
 .logo-text {
@@ -147,7 +150,10 @@ h2 {
   border: 1px solid var(--border);
   cursor: pointer;
   overflow: hidden;
-  transition: transform 140ms, border-color 140ms, background 140ms;
+  transition:
+    transform 140ms,
+    border-color 140ms,
+    background 140ms;
 
   &::before {
     content: '';
@@ -164,7 +170,11 @@ h2 {
 
   &.active {
     border-color: var(--accent);
-    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 18%, transparent), var(--panel));
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      var(--panel)
+    );
     transform: translateX(6px);
 
     &::before {
@@ -247,8 +257,23 @@ h2 {
   --fill: 1;
   width: 14px;
   height: 14px;
-  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  background: linear-gradient(90deg, var(--amber) calc(var(--fill) * 100%), rgba(255, 255, 255, 0.15) 0);
+  clip-path: polygon(
+    50% 0,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  background: linear-gradient(
+    90deg,
+    var(--amber) calc(var(--fill) * 100%),
+    rgba(255, 255, 255, 0.15) 0
+  );
 }
 
 .stats {

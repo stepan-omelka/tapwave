@@ -49,7 +49,10 @@ function readStored(): StoredSettings {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Partial<StoredSettings>;
     return {
-      playerName: typeof parsed.playerName === 'string' ? parsed.playerName.slice(0, 24) : DEFAULTS.playerName,
+      playerName:
+        typeof parsed.playerName === 'string'
+          ? parsed.playerName.slice(0, 24)
+          : DEFAULTS.playerName,
       volume: clampNumber(parsed.volume, 0, 1, DEFAULTS.volume),
       offsetMs: clampNumber(parsed.offsetMs, -300, 300, DEFAULTS.offsetMs),
       backgroundDim: clampNumber(parsed.backgroundDim, 0, 1, DEFAULTS.backgroundDim),
@@ -60,5 +63,7 @@ function readStored(): StoredSettings {
 }
 
 function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Math.min(max, Math.max(min, value))
+    : fallback;
 }

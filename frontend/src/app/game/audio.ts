@@ -240,7 +240,8 @@ class SynthTrack {
     const beatLength = 60 / beatmap.bpm;
     this.stepLength = beatLength / 4;
     // Song runs one bar past the last object, then a final hit.
-    this.totalSteps = Math.ceil((beatmap.durationMs / 1000 - beatmap.offsetMs / 1000) / this.stepLength) + 16;
+    this.totalSteps =
+      Math.ceil((beatmap.durationMs / 1000 - beatmap.offsetMs / 1000) / this.stepLength) + 16;
     this.root = 45 + Math.floor(random() * 7);
     this.progression = PROGRESSIONS[Math.floor(random() * PROGRESSIONS.length)];
     this.arpPattern = Array.from({ length: 16 }, () => Math.floor(random() * 6));
@@ -309,7 +310,8 @@ class SynthTrack {
     if (!breakdown) {
       if (s % 4 === 0) this.kick(t, s === 0 ? 1 : 0.85);
       if (bar >= 1 && (s === 4 || s === 12)) this.snare(t);
-      if (bar >= 1 && s % 2 === 0) this.hat(t, s % 4 === 2 ? 0.16 : 0.07, s % 4 === 2 ? 0.09 : 0.035);
+      if (bar >= 1 && s % 2 === 0)
+        this.hat(t, s % 4 === 2 ? 0.16 : 0.07, s % 4 === 2 ? 0.09 : 0.035);
       if (bar >= 1 && s % 2 === 0 && this.bassPattern[s / 2]) {
         this.bass(t, chordRoot - 12 + (s % 8 === 6 ? 12 : 0));
       }

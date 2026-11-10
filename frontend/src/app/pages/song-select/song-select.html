@@ -42,17 +42,45 @@
 @if (settingsOpen()) {
   <section id="settings-panel" class="settings" aria-label="Settings">
     <label>
-      <span>Volume <output>{{ settings.volume() * 100 | number: '1.0-0' }}%</output></span>
-      <input type="range" min="0" max="1" step="0.05" [value]="settings.volume()" (input)="onRange('volume', $event)" />
+      <span
+        >Volume <output>{{ settings.volume() * 100 | number: '1.0-0' }}%</output></span
+      >
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        [value]="settings.volume()"
+        (input)="onRange('volume', $event)"
+      />
     </label>
     <label>
-      <span>Audio offset <output>{{ settings.offsetMs() }} ms</output></span>
-      <input type="range" min="-150" max="150" step="5" [value]="settings.offsetMs()" (input)="onRange('offsetMs', $event)" />
+      <span
+        >Audio offset <output>{{ settings.offsetMs() }} ms</output></span
+      >
+      <input
+        type="range"
+        min="-150"
+        max="150"
+        step="5"
+        [value]="settings.offsetMs()"
+        (input)="onRange('offsetMs', $event)"
+      />
       <small>Raise it if your hits land late on every map (e.g. Bluetooth headphones).</small>
     </label>
     <label>
-      <span>Background dim <output>{{ settings.backgroundDim() * 100 | number: '1.0-0' }}%</output></span>
-      <input type="range" min="0" max="1" step="0.05" [value]="settings.backgroundDim()" (input)="onRange('backgroundDim', $event)" />
+      <span
+        >Background dim
+        <output>{{ settings.backgroundDim() * 100 | number: '1.0-0' }}%</output></span
+      >
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        [value]="settings.backgroundDim()"
+        (input)="onRange('backgroundDim', $event)"
+      />
     </label>
   </section>
 }
@@ -63,7 +91,9 @@
     @if (beatmaps.isLoading()) {
       <p class="muted">Loading tracks…</p>
     } @else if (beatmaps.error()) {
-      <p class="error-box" role="alert">Could not reach the server. Is the backend running on port 8081?</p>
+      <p class="error-box" role="alert">
+        Could not reach the server. Is the backend running on port 8081?
+      </p>
     }
     <ul class="map-list">
       @for (map of beatmaps.value(); track map.id; let i = $index) {
@@ -108,7 +138,9 @@
               }
               by {{ map.artist }} ·
               @if (map.audioLicenseUrl) {
-                <a [href]="map.audioLicenseUrl" target="_blank" rel="noopener license">{{ map.audioLicense }}</a>
+                <a [href]="map.audioLicenseUrl" target="_blank" rel="noopener license">{{
+                  map.audioLicense
+                }}</a>
               } @else {
                 {{ map.audioLicense }}
               }
@@ -117,7 +149,10 @@
             }
           </p>
         </div>
-        <div class="stars" [attr.aria-label]="'Difficulty ' + (map.starRating | number: '1.2-2') + ' stars'">
+        <div
+          class="stars"
+          [attr.aria-label]="'Difficulty ' + (map.starRating | number: '1.2-2') + ' stars'"
+        >
           @for (fill of stars(map.starRating); track $index) {
             <span class="star" [style.--fill]="fill" aria-hidden="true"></span>
           }
@@ -127,9 +162,13 @@
       <dl class="stats">
         @for (stat of stats(); track stat.key) {
           <div class="stat">
-            <dt><abbr [title]="stat.label">{{ stat.key }}</abbr></dt>
+            <dt>
+              <abbr [title]="stat.label">{{ stat.key }}</abbr>
+            </dt>
             <dd>
-              <span class="bar" aria-hidden="true"><span [style.width.%]="stat.value * 10"></span></span>
+              <span class="bar" aria-hidden="true"
+                ><span [style.width.%]="stat.value * 10"></span
+              ></span>
               <span class="value">{{ stat.value | number: '1.0-1' }}</span>
             </dd>
           </div>
@@ -153,7 +192,12 @@
         <p class="muted">No scores yet — be the first.</p>
       } @else {
         <table class="board">
-          <caption class="visually-hidden">Best score per player on {{ map.title }}</caption>
+          <caption class="visually-hidden">
+            Best score per player on
+            {{
+              map.title
+            }}
+          </caption>
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -166,13 +210,21 @@
           </thead>
           <tbody>
             @for (entry of leaderboard.value(); track entry.scoreId) {
-              <tr [class.me]="entry.playerName.toLowerCase() === settings.playerName().trim().toLowerCase()">
+              <tr
+                [class.me]="
+                  entry.playerName.toLowerCase() === settings.playerName().trim().toLowerCase()
+                "
+              >
                 <td>{{ entry.rank }}</td>
                 <td>{{ entry.playerName }}</td>
                 <td class="num mono">{{ entry.totalScore | number }}</td>
                 <td class="num mono">{{ entry.accuracy | number: '1.2-2' }}%</td>
                 <td class="num mono">{{ entry.maxCombo }}x</td>
-                <td><span class="grade" [class]="'grade grade-' + entry.grade">{{ entry.grade }}</span></td>
+                <td>
+                  <span class="grade" [class]="'grade grade-' + entry.grade">{{
+                    entry.grade
+                  }}</span>
+                </td>
               </tr>
             }
           </tbody>

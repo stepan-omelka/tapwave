@@ -63,9 +63,13 @@ interface Run {
 function play(detail: BeatmapDetail, options: { autoplay: boolean; seed: number }): Run {
   const audio = new FakeAudio();
   const run: Run = { engine: null!, outcome: null, failed: false };
-  const engine = new GameEngine(fakeCanvas(), detail, audio as unknown as AudioEngine,
+  const engine = new GameEngine(
+    fakeCanvas(),
+    detail,
+    audio as unknown as AudioEngine,
     { autoplay: options.autoplay, offsetMs: 0, backgroundDim: 0 },
-    { finished: (o) => (run.outcome = o), failed: () => (run.failed = true) });
+    { finished: (o) => (run.outcome = o), failed: () => (run.failed = true) },
+  );
   run.engine = engine;
 
   const rnd = random(options.seed);
@@ -75,7 +79,9 @@ function play(detail: BeatmapDetail, options: { autoplay: boolean; seed: number 
     offset: Math.round((rnd() - 0.5) * 2 * (window100(od) + 10)),
     letGoAt: o.type === 'slider' && rnd() < 0.3 ? o.time + (o.endTime! - o.time) * rnd() : Infinity,
   }));
-  const paths = detail.hitObjects.map((o) => (o.slider ? new SliderPath(o.slider.points, o.slider.curve) : null));
+  const paths = detail.hitObjects.map((o) =>
+    o.slider ? new SliderPath(o.slider.points, o.slider.curve) : null,
+  );
 
   for (let t = engine.startTime; t <= engine.endTime + 50 && !run.outcome && !run.failed; t += 4) {
     audio.now = t;
@@ -92,7 +98,9 @@ function steer(
   paths: (SliderPath | null)[],
   t: number,
 ): void {
-  const i = objects.findIndex((o, index) => index >= engine.firstUnfinished && (o.endTime ?? o.time) + 200 >= t);
+  const i = objects.findIndex(
+    (o, index) => index >= engine.firstUnfinished && (o.endTime ?? o.time) + 200 >= t,
+  );
   if (i < 0) return;
   const o = objects[i];
   const plan = plans[i];
@@ -136,25 +144,76 @@ function generatedMap(): BeatmapDetail {
     const y = 120 + (i % 5) * 30;
     if (i % 7 === 3) {
       objects.push({
-        type: 'slider', time, x, y, newCombo: i % 4 === 0, comboNumber: 1, colorIndex: 0, endTime: time + 600,
+        type: 'slider',
+        time,
+        x,
+        y,
+        newCombo: i % 4 === 0,
+        comboNumber: 1,
+        colorIndex: 0,
+        endTime: time + 600,
         slider: {
-          curve: 'bezier', points: [{ x, y }, { x: x + 40, y: y + 60 }, { x: x + 90, y }], slides: 2, spanDuration: 300,
-          parts: [{ time: time + 300, kind: 'repeat' }, { time: time + 600, kind: 'tail' }],
+          curve: 'bezier',
+          points: [
+            { x, y },
+            { x: x + 40, y: y + 60 },
+            { x: x + 90, y },
+          ],
+          slides: 2,
+          spanDuration: 300,
+          parts: [
+            { time: time + 300, kind: 'repeat' },
+            { time: time + 600, kind: 'tail' },
+          ],
         },
       });
       time += 900;
     } else {
-      objects.push({ type: 'circle', time, x, y, newCombo: i % 4 === 0, comboNumber: 1, colorIndex: 0 });
+      objects.push({
+        type: 'circle',
+        time,
+        x,
+        y,
+        newCombo: i % 4 === 0,
+        comboNumber: 1,
+        colorIndex: 0,
+      });
       time += i % 3 === 0 ? 150 : 320;
     }
   }
-  objects.push({ type: 'spinner', time, x: 256, y: 192, newCombo: true, comboNumber: 0, colorIndex: 0, endTime: time + 2500 });
+  objects.push({
+    type: 'spinner',
+    time,
+    x: 256,
+    y: 192,
+    newCombo: true,
+    comboNumber: 0,
+    colorIndex: 0,
+    endTime: time + 2500,
+  });
   return {
     beatmap: {
-      id: 1, slug: 't', title: 'T', artist: 'A', mapper: 'M', difficultyName: 'D', bpm: 120, offsetMs: 0,
-      circleSize: 4, approachRate: 8, overallDifficulty: 6, hpDrain: 2, durationMs: time + 2500, starRating: 3,
-      objectCount: objects.length, maxCombo: 0, audioUrl: null, audioSourceUrl: null, audioLicense: null,
-      audioLicenseUrl: null, synthSeed: 1,
+      id: 1,
+      slug: 't',
+      title: 'T',
+      artist: 'A',
+      mapper: 'M',
+      difficultyName: 'D',
+      bpm: 120,
+      offsetMs: 0,
+      circleSize: 4,
+      approachRate: 8,
+      overallDifficulty: 6,
+      hpDrain: 2,
+      durationMs: time + 2500,
+      starRating: 3,
+      objectCount: objects.length,
+      maxCombo: 0,
+      audioUrl: null,
+      audioSourceUrl: null,
+      audioLicense: null,
+      audioLicenseUrl: null,
+      synthSeed: 1,
     },
     hitObjects: objects,
   };
@@ -179,9 +238,21 @@ describe('GameEngine live score vs. server-equivalent recomputation', () => {
       expect(run.outcome).not.toBeNull();
       const k = run.engine.keeper;
       const summary = calculateScore(detail.hitObjects, run.outcome!.results, 6, 2);
-      expect({ score: k.score, maxCombo: k.maxCombo, c300: k.count300, c100: k.count100, c50: k.count50, miss: k.countMiss })
-        .toEqual({ score: summary.totalScore, maxCombo: summary.maxCombo, c300: summary.count300, c100: summary.count100,
-          c50: summary.count50, miss: summary.countMiss });
+      expect({
+        score: k.score,
+        maxCombo: k.maxCombo,
+        c300: k.count300,
+        c100: k.count100,
+        c50: k.count50,
+        miss: k.countMiss,
+      }).toEqual({
+        score: summary.totalScore,
+        maxCombo: summary.maxCombo,
+        c300: summary.count300,
+        c100: summary.count100,
+        c50: summary.count50,
+        miss: summary.countMiss,
+      });
       // The script really is sloppy, so this is not just comparing two perfect runs.
       expect(summary.accuracy).toBeLessThan(100);
     });
@@ -189,11 +260,20 @@ describe('GameEngine live score vs. server-equivalent recomputation', () => {
 
   it('plays the golden map with autoplay', () => {
     const detail: BeatmapDetail = {
-      beatmap: { ...generatedMap().beatmap, overallDifficulty: golden.overallDifficulty, hpDrain: golden.hpDrain },
+      beatmap: {
+        ...generatedMap().beatmap,
+        overallDifficulty: golden.overallDifficulty,
+        hpDrain: golden.hpDrain,
+      },
       hitObjects: golden.hitObjects as HitObject[],
     };
     const run = play(detail, { autoplay: true, seed: 1 });
-    const summary = calculateScore(detail.hitObjects, run.outcome!.results, golden.overallDifficulty, golden.hpDrain);
+    const summary = calculateScore(
+      detail.hitObjects,
+      run.outcome!.results,
+      golden.overallDifficulty,
+      golden.hpDrain,
+    );
     expect(summary.grade).toBe('SS');
     expect(run.engine.keeper.score).toBe(summary.totalScore);
   });
@@ -208,16 +288,31 @@ describe('GameEngine intro skip', () => {
       ...o,
       time: o.time + shift,
       ...(o.endTime === undefined ? {} : { endTime: o.endTime + shift }),
-      ...(o.slider ? { slider: { ...o.slider, parts: o.slider.parts.map((p) => ({ ...p, time: p.time + shift })) } } : {}),
+      ...(o.slider
+        ? {
+            slider: {
+              ...o.slider,
+              parts: o.slider.parts.map((p) => ({ ...p, time: p.time + shift })),
+            },
+          }
+        : {}),
     }));
     return { ...base, hitObjects };
   }
 
   function start(detail: BeatmapDetail, audio: FakeAudio) {
     const run = { outcome: null as PlayOutcome | null, offers: [] as boolean[] };
-    const engine = new GameEngine(fakeCanvas(), detail, audio as unknown as AudioEngine,
+    const engine = new GameEngine(
+      fakeCanvas(),
+      detail,
+      audio as unknown as AudioEngine,
       { autoplay: true, offsetMs: 0, backgroundDim: 0 },
-      { finished: (o) => (run.outcome = o), failed: () => undefined, skippable: (a) => run.offers.push(a) });
+      {
+        finished: (o) => (run.outcome = o),
+        failed: () => undefined,
+        skippable: (a) => run.offers.push(a),
+      },
+    );
     audio.now = engine.startTime;
     engine.tick(audio.now);
     return { engine, run };

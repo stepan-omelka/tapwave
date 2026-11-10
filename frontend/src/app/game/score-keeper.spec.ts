@@ -83,7 +83,13 @@ describe('calculateScore', () => {
     expect(summary.countMiss).toBe(0);
     // circle 300 @0 combo, head + tick + tail (30 + 10 + 30), slider 300 @4, circle 300 @4, spinner 300 @5
     const expected =
-      judgementScore(300, 0) + 30 + 10 + 30 + judgementScore(300, 4) + judgementScore(300, 4) + judgementScore(300, 5);
+      judgementScore(300, 0) +
+      30 +
+      10 +
+      30 +
+      judgementScore(300, 4) +
+      judgementScore(300, 4) +
+      judgementScore(300, 5);
     expect(summary.totalScore).toBe(expected);
     expect(summary.totalScore).toBe(1426);
   });
@@ -96,7 +102,9 @@ describe('calculateScore', () => {
       { spins: 0.5 }, // miss
     ];
     const summary = calculateScore(MAP, results, OD, HP);
-    expect([summary.count300, summary.count100, summary.count50, summary.countMiss]).toEqual([1, 1, 1, 1]);
+    expect([summary.count300, summary.count100, summary.count50, summary.countMiss]).toEqual([
+      1, 1, 1, 1,
+    ]);
     expect(summary.totalScore).toBe(474);
     expect(summary.maxCombo).toBe(2);
     expect(summary.accuracy).toBeCloseTo((100 * (300 + 100 + 50)) / 1200, 10);
@@ -105,7 +113,12 @@ describe('calculateScore', () => {
 
   it('fails when HP runs out', () => {
     const many = Array.from({ length: 30 }, (_, i) => circle(1000 + i * 300));
-    const summary = calculateScore(many, many.map(() => ({ offset: null })), OD, 10);
+    const summary = calculateScore(
+      many,
+      many.map(() => ({ offset: null })),
+      OD,
+      10,
+    );
     expect(summary.failed).toBe(true);
     expect(summary.countMiss).toBe(30);
   });

@@ -37,8 +37,8 @@ cd frontend && npx ng test --watch=false
 # production build of the frontend (type checks and bundle budgets)
 cd frontend && npx ng build
 
-# format the frontend files you changed (see Code style)
-cd frontend && npx prettier --write src/app/game/engine.ts
+# format the frontend
+cd frontend && npx prettier --write src
 
 # the production image, as Render builds it
 docker buildx build --platform linux/amd64 -t tapwave .
@@ -52,10 +52,9 @@ Environment variables and their defaults are in the
 
 ### Code style
 
-The frontend has a Prettier config (`frontend/.prettierrc`, `frontend/.editorconfig`), but not every
-file follows it, so format only the files you change; a whole-tree format would bury the change
-in noise. The backend has no formatter; match the surrounding code (records for values and DTOs, constructor
-injection). The conventions that matter for each part are in its README.
+The frontend is formatted by Prettier (`frontend/.prettierrc`, `frontend/.editorconfig`), and
+`npx prettier --check src` must pass. The backend has no formatter; match the surrounding code
+(records for values and DTOs, constructor injection). The conventions that matter for each part are in its README.
 
 ### Testing
 

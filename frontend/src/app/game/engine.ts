@@ -146,7 +146,9 @@ export class GameEngine {
     this.window300 = window300(map.overallDifficulty);
     this.window100 = window100(map.overallDifficulty);
     this.window50 = window50(map.overallDifficulty);
-    this.states = detail.hitObjects.map((object, index) => createState(object, index, map.overallDifficulty));
+    this.states = detail.hitObjects.map((object, index) =>
+      createState(object, index, map.overallDifficulty),
+    );
 
     const first = detail.hitObjects[0];
     const last = detail.hitObjects[detail.hitObjects.length - 1];
@@ -156,7 +158,9 @@ export class GameEngine {
 
     this.renderer = new Renderer(canvas, this);
     this.autoplay = options.autoplay ? new Autoplay(this) : null;
-    window.addEventListener('resize', () => this.renderer.resize(), { signal: this.listeners.signal });
+    window.addEventListener('resize', () => this.renderer.resize(), {
+      signal: this.listeners.signal,
+    });
     if (!options.autoplay) this.bindInput(canvas);
   }
 
@@ -367,7 +371,10 @@ export class GameEngine {
     if (this.paused || this.over || this.keysDown.has(key)) return;
     this.keysDown.add(key);
     this.keyCounts[key]++;
-    const delay = eventTimeStamp === undefined ? 0 : Math.min(100, Math.max(0, performance.now() - eventTimeStamp));
+    const delay =
+      eventTimeStamp === undefined
+        ? 0
+        : Math.min(100, Math.max(0, performance.now() - eventTimeStamp));
     this.tryHit(this.audio.timeMs() - this.options.offsetMs - delay);
   }
 
@@ -414,7 +421,10 @@ export class GameEngine {
     this.allHitErrors.push(offset);
     this.audio.play('hit');
     if (o.type === 'circle') {
-      const judgement = judgeOffset(offset, this.detail.beatmap.overallDifficulty) as Exclude<Judgement, 0>;
+      const judgement = judgeOffset(offset, this.detail.beatmap.overallDifficulty) as Exclude<
+        Judgement,
+        0
+      >;
       this.keeper.judge(judgement, true);
       this.finish(target, judgement, time, o);
     } else {
@@ -437,13 +447,17 @@ export class GameEngine {
     if (t >= o.time) {
       const ball = s.path!.pointAt(sliderProgress(o, t).progress);
       const holding = this.keysDown.size > 0;
-      s.tracking = holding && Math.hypot(this.cursor.x - ball.x, this.cursor.y - ball.y) <= this.radius * FOLLOW_RADIUS_FACTOR;
+      s.tracking =
+        holding &&
+        Math.hypot(this.cursor.x - ball.x, this.cursor.y - ball.y) <=
+          this.radius * FOLLOW_RADIUS_FACTOR;
     }
 
     // Record each part when it comes due...
     while (s.nextPart < shape.parts.length) {
       const part = shape.parts[s.nextPart];
-      const checkAt = part.kind === 'tail' ? Math.max(o.time, part.time - TAIL_LENIENCY_MS) : part.time;
+      const checkAt =
+        part.kind === 'tail' ? Math.max(o.time, part.time - TAIL_LENIENCY_MS) : part.time;
       if (t < checkAt) break;
       s.partsHit.push(s.tracking);
       s.nextPart++;
@@ -497,7 +511,7 @@ export class GameEngine {
         delta = Math.max(-maxDelta, Math.min(maxDelta, delta));
         s.rotation += delta;
         s.spins = Math.abs(s.rotation) / TWO_PI;
-        if (dt > 0) s.rpm = s.rpm * 0.85 + ((Math.abs(delta) / TWO_PI) * (60000 / dt)) * 0.15;
+        if (dt > 0) s.rpm = s.rpm * 0.85 + (Math.abs(delta) / TWO_PI) * (60000 / dt) * 0.15;
         const bonus = Math.floor(Math.max(0, s.spins - s.required));
         if (bonus > s.bonusSpins) {
           s.bonusSpins = bonus;

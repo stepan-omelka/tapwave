@@ -5,7 +5,12 @@ import { sliderProgress } from './slider-path';
 
 /** Tapwave's own palette: cyan, amber, violet, mint. */
 export const COMBO_COLORS = ['#38e8ff', '#ffb347', '#a78bfa', '#4ade80'];
-const JUDGEMENT_COLORS: Record<Judgement, string> = { 300: '#7dd3fc', 100: '#86efac', 50: '#fcd34d', 0: '#f87171' };
+const JUDGEMENT_COLORS: Record<Judgement, string> = {
+  300: '#7dd3fc',
+  100: '#86efac',
+  50: '#fcd34d',
+  0: '#f87171',
+};
 const FONT = "'Inter', 'Segoe UI', system-ui, sans-serif";
 const MONO = "'JetBrains Mono', 'SF Mono', ui-monospace, monospace";
 const HIT_ANIMATION_MS = 180;
@@ -21,7 +26,8 @@ export class Renderer {
   private width = 0;
   private height = 0;
   private readonly trail: PathPoint[] = [];
-  private readonly reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  private readonly reducedMotion =
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -82,7 +88,14 @@ export class Renderer {
     const pulse = this.reducedMotion ? 0 : Math.max(0, 1 - sinceBeat / (beat * 0.6));
     const sinceBar = t > offset ? (t - offset) % (beat * 4) : beat * 4;
 
-    const gradient = ctx.createRadialGradient(w / 2, h * 0.55, 0, w / 2, h * 0.55, Math.max(w, h) * 0.75);
+    const gradient = ctx.createRadialGradient(
+      w / 2,
+      h * 0.55,
+      0,
+      w / 2,
+      h * 0.55,
+      Math.max(w, h) * 0.75,
+    );
     gradient.addColorStop(0, `rgb(${22 + pulse * 10}, ${30 + pulse * 14}, ${62 + pulse * 22})`);
     gradient.addColorStop(1, '#05070f');
     ctx.fillStyle = gradient;
@@ -107,7 +120,13 @@ export class Renderer {
       ctx.strokeStyle = `rgba(56, 232, 255, ${0.18 * (1 - ringProgress)})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(w / 2, h / 2, Math.max(w, h) * 0.08 + ringProgress * Math.max(w, h) * 0.6, 0, Math.PI * 2);
+      ctx.arc(
+        w / 2,
+        h / 2,
+        Math.max(w, h) * 0.08 + ringProgress * Math.max(w, h) * 0.6,
+        0,
+        Math.PI * 2,
+      );
       ctx.stroke();
     }
     ctx.restore();
@@ -194,7 +213,14 @@ export class Renderer {
     this.drawApproach(o, t, color, alpha);
   }
 
-  private drawHitCircle(x: number, y: number, color: string, number: number, alpha: number, scale: number): void {
+  private drawHitCircle(
+    x: number,
+    y: number,
+    color: string,
+    number: number,
+    alpha: number,
+    scale: number,
+  ): void {
     const ctx = this.ctx;
     const r = this.engine.radius * scale;
     ctx.save();
@@ -411,7 +437,11 @@ export class Renderer {
       ctx.fillStyle = JUDGEMENT_COLORS[popup.judgement];
       const size = popup.judgement === 300 ? 18 : 26;
       ctx.font = `800 ${size}px ${FONT}`;
-      ctx.fillText(popup.judgement === 0 ? '✕' : String(popup.judgement), popup.x, popup.y - 6 - p * 18);
+      ctx.fillText(
+        popup.judgement === 0 ? '✕' : String(popup.judgement),
+        popup.x,
+        popup.y - 6 - p * 18,
+      );
     }
     ctx.restore();
   }
@@ -510,7 +540,11 @@ export class Renderer {
       ctx.fillText(map.title, w / 2, h * 0.42);
       ctx.fillStyle = '#94a3b8';
       ctx.font = `500 ${Math.round(18 * unit)}px ${FONT}`;
-      ctx.fillText(`${map.artist} · ${map.difficultyName} · ${map.bpm} BPM`, w / 2, h * 0.42 + 40 * unit);
+      ctx.fillText(
+        `${map.artist} · ${map.difficultyName} · ${map.bpm} BPM`,
+        w / 2,
+        h * 0.42 + 40 * unit,
+      );
     }
     ctx.restore();
   }

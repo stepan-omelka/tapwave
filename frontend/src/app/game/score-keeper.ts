@@ -95,12 +95,20 @@ export interface PlaySummary {
   failed: boolean;
 }
 
-function accuracyOf(k: Pick<ScoreKeeper, 'count300' | 'count100' | 'count50'>, total: number): number {
+function accuracyOf(
+  k: Pick<ScoreKeeper, 'count300' | 'count100' | 'count50'>,
+  total: number,
+): number {
   return (100 * (300 * k.count300 + 100 * k.count100 + 50 * k.count50)) / (300 * total);
 }
 
 /** Pure re-computation of a play, identical to the server's. Used for autoplay and offline results. */
-export function calculateScore(objects: HitObject[], results: ObjectResult[], od: number, hp: number): PlaySummary {
+export function calculateScore(
+  objects: HitObject[],
+  results: ObjectResult[],
+  od: number,
+  hp: number,
+): PlaySummary {
   const keeper = new ScoreKeeper(hp);
   for (let i = 0; i < objects.length && !keeper.failed; i++) {
     const object = objects[i];
@@ -139,7 +147,12 @@ export function calculateScore(objects: HitObject[], results: ObjectResult[], od
   };
 }
 
-function applySlider(keeper: ScoreKeeper, object: HitObject, result: ObjectResult, od: number): void {
+function applySlider(
+  keeper: ScoreKeeper,
+  object: HitObject,
+  result: ObjectResult,
+  od: number,
+): void {
   const parts = object.slider!.parts;
   const flags = result.parts ?? [];
   let hit = 0;

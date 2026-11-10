@@ -9,7 +9,10 @@ export class SliderPath {
   private readonly cumulative: number[];
 
   constructor(controlPoints: PathPoint[], curve: 'linear' | 'bezier') {
-    this.samples = curve === 'linear' || controlPoints.length < 3 ? [...controlPoints] : sampleBezier(controlPoints);
+    this.samples =
+      curve === 'linear' || controlPoints.length < 3
+        ? [...controlPoints]
+        : sampleBezier(controlPoints);
     this.cumulative = [0];
     for (let i = 1; i < this.samples.length; i++) {
       const a = this.samples[i - 1];
@@ -71,7 +74,10 @@ function deCasteljau(points: PathPoint[], t: number): PathPoint {
  * Where the slider ball is at {@code time}: progress along the path (0..1, already
  * reversed on repeat passes) and the index of the current pass.
  */
-export function sliderProgress(object: HitObject, time: number): { progress: number; pass: number } {
+export function sliderProgress(
+  object: HitObject,
+  time: number,
+): { progress: number; pass: number } {
   const shape = object.slider!;
   const elapsed = Math.max(0, time - object.time);
   const pass = Math.min(shape.slides - 1, Math.floor(elapsed / shape.spanDuration));

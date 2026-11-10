@@ -1,7 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BeatmapDetail, StartPlayResponse, SubmitScoreRequest, SubmitScoreResponse } from './models';
+import {
+  BeatmapDetail,
+  StartPlayResponse,
+  SubmitScoreRequest,
+  SubmitScoreResponse,
+} from './models';
 
 /** Calls that change state or are needed imperatively; read-only lists use httpResource in the pages. */
 @Service()

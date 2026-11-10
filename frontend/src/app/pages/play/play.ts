@@ -22,7 +22,16 @@ import { AudioEngine } from '../../game/audio';
 import { GameEngine, PlayOutcome } from '../../game/engine';
 import { calculateScore, PlaySummary } from '../../game/score-keeper';
 
-type PlayState = 'loading' | 'ready' | 'starting' | 'playing' | 'paused' | 'failed' | 'submitting' | 'results' | 'error';
+type PlayState =
+  | 'loading'
+  | 'ready'
+  | 'starting'
+  | 'playing'
+  | 'paused'
+  | 'failed'
+  | 'submitting'
+  | 'results'
+  | 'error';
 
 interface ResultView extends Omit<PlaySummary, 'failed'> {
   /** Numbers come from the server's own re-computation. */
@@ -165,14 +174,18 @@ export class Play {
       return;
     }
     // Enter/Space on the focused Start button already click it; every other key starts too.
-    const buttonKey = event.target instanceof HTMLButtonElement && (event.key === 'Enter' || event.key === ' ');
+    const buttonKey =
+      event.target instanceof HTMLButtonElement && (event.key === 'Enter' || event.key === ' ');
     if (state === 'ready' && !event.repeat && event.key !== 'Tab' && !buttonKey) {
       event.preventDefault();
       void this.begin();
     } else if (state === 'playing' && event.code === 'Space') {
       event.preventDefault();
       if (!event.repeat) this.skip();
-    } else if ((state === 'results' || state === 'failed' || state === 'paused') && event.code === 'KeyR') {
+    } else if (
+      (state === 'results' || state === 'failed' || state === 'paused') &&
+      event.code === 'KeyR'
+    ) {
       this.retry();
     }
   }
@@ -190,7 +203,8 @@ export class Play {
     try {
       const id = Number(this.id());
       const cached = this.detail();
-      const detail = cached?.beatmap.id === id ? cached : await firstValueFrom(this.api.beatmap(id));
+      const detail =
+        cached?.beatmap.id === id ? cached : await firstValueFrom(this.api.beatmap(id));
       audio = new AudioEngine(this.settings.volume());
       await audio.load(detail.beatmap);
       if (generation !== this.generation) {
@@ -211,8 +225,16 @@ export class Play {
   private async onFinished(outcome: PlayOutcome, generation: number): Promise<void> {
     const detail = this.detail()!;
     const map = detail.beatmap;
-    const local = calculateScore(detail.hitObjects, outcome.results, map.overallDifficulty, map.hpDrain);
-    if (isDevMode() && (outcome.live.score !== local.totalScore || outcome.live.maxCombo !== local.maxCombo)) {
+    const local = calculateScore(
+      detail.hitObjects,
+      outcome.results,
+      map.overallDifficulty,
+      map.hpDrain,
+    );
+    if (
+      isDevMode() &&
+      (outcome.live.score !== local.totalScore || outcome.live.maxCombo !== local.maxCombo)
+    ) {
       console.warn('Live score differs from the recomputed one', outcome.live, local);
     }
     const meanError = outcome.hitErrors.length
@@ -234,7 +256,10 @@ export class Play {
     this.state.set('submitting');
     try {
       const server = await firstValueFrom(
-        this.api.submitScore(this.playId, { playerName: this.settings.playerName().trim(), results: outcome.results }),
+        this.api.submitScore(this.playId, {
+          playerName: this.settings.playerName().trim(),
+          results: outcome.results,
+        }),
       );
       if (generation !== this.generation) return;
       if (isDevMode() && server.totalScore !== local.totalScore) {
@@ -244,7 +269,10 @@ export class Play {
     } catch (error) {
       if (generation !== this.generation) return;
       const detailText = (error as { error?: { detail?: string } })?.error?.detail;
-      this.result.set({ ...base, note: `Score not saved: ${detailText ?? 'the server did not respond.'}` });
+      this.result.set({
+        ...base,
+        note: `Score not saved: ${detailText ?? 'the server did not respond.'}`,
+      });
     }
     this.state.set('results');
   }

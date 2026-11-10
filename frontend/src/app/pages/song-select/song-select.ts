@@ -1,6 +1,15 @@
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { Component, computed, ElementRef, inject, input, linkedSignal, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { BeatmapSummary, LeaderboardEntry, RecentScore } from '../../core/models';
 import { SettingsService } from '../../core/settings.service';
@@ -20,8 +29,12 @@ export class SongSelect {
   /** Pre-selected map, e.g. when coming back from a play (?map=3). */
   readonly map = input<string>();
 
-  protected readonly beatmaps = httpResource<BeatmapSummary[]>(() => '/api/beatmaps', { defaultValue: [] });
-  protected readonly recent = httpResource<RecentScore[]>(() => '/api/scores/recent?limit=8', { defaultValue: [] });
+  protected readonly beatmaps = httpResource<BeatmapSummary[]>(() => '/api/beatmaps', {
+    defaultValue: [],
+  });
+  protected readonly recent = httpResource<RecentScore[]>(() => '/api/scores/recent?limit=8', {
+    defaultValue: [],
+  });
 
   protected readonly selectedId = linkedSignal(() => Number(this.map()) || null);
   protected readonly selected = computed(() => {
@@ -38,7 +51,9 @@ export class SongSelect {
 
   protected readonly settingsOpen = signal(false);
   protected readonly nameTouched = signal(false);
-  protected readonly showNameError = computed(() => this.nameTouched() && !this.settings.playerNameValid());
+  protected readonly showNameError = computed(
+    () => this.nameTouched() && !this.settings.playerNameValid(),
+  );
 
   private readonly nameInput = viewChild.required<ElementRef<HTMLInputElement>>('nameInput');
 
@@ -96,6 +111,8 @@ export class SongSelect {
   }
 
   protected stars(rating: number): number[] {
-    return Array.from({ length: Math.min(10, Math.ceil(rating)) }, (_, i) => Math.min(1, rating - i));
+    return Array.from({ length: Math.min(10, Math.ceil(rating)) }, (_, i) =>
+      Math.min(1, rating - i),
+    );
   }
 }

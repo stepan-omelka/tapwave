@@ -38,6 +38,7 @@ Verify a change with both test suites. The backend's integration tests need a ru
 cd backend && ./mvnw test                  # JUnit, Testcontainers on PostgreSQL 18
 cd frontend && npx ng test --watch=false   # Vitest
 cd frontend && npx ng build                # type checks and bundle budgets
+cd frontend && npx prettier --check src    # formatting
 ```
 
 Comments describe the code as it stands, never how it used to look: no "was X, now Y", no

@@ -17,7 +17,9 @@ export class Autoplay {
 
   steer(t: number): void {
     const states = this.engine.states;
-    const index = states.findIndex((s, i) => i >= this.engine.firstUnfinished && finishTime(s) >= t);
+    const index = states.findIndex(
+      (s, i) => i >= this.engine.firstUnfinished && finishTime(s) >= t,
+    );
     const keys = this.engine.keysDown;
     if (index < 0) {
       keys.clear();
@@ -31,7 +33,10 @@ export class Autoplay {
         keys.add('K1');
       } else if (o.type === 'spinner') {
         const angle = ((t - o.time) / 1000) * SPINS_PER_SECOND * Math.PI * 2;
-        this.moveTo({ x: CENTER.x + Math.cos(angle) * SPIN_RADIUS, y: CENTER.y + Math.sin(angle) * SPIN_RADIUS });
+        this.moveTo({
+          x: CENTER.x + Math.cos(angle) * SPIN_RADIUS,
+          y: CENTER.y + Math.sin(angle) * SPIN_RADIUS,
+        });
         keys.add('K1');
       } else {
         this.moveTo(o);

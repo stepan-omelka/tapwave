@@ -57,7 +57,7 @@ exposes the running engine as `window.tapwave`.
 | `npm install`                    | install dependencies (npm 11, Node 24)                                                       |
 | `npm start`                      | dev server on <http://localhost:4201>, proxying `/api` to the backend on `:8081` (`proxy.conf.json`) |
 | `npx ng build`                   | production build into `dist/frontend/browser/`, with type checks and bundle budgets         |
-| `npx prettier --write <files>`   | format the files you changed, see [code style](../CONTRIBUTING.md#code-style)                 |
+| `npx prettier --write src`       | format; `npx prettier --check src` must pass                                                  |
 
 Open `/play/<id>?auto=1` to watch autoplay on a map. Everything else follows
 [`CONTRIBUTING.md`](../CONTRIBUTING.md).
