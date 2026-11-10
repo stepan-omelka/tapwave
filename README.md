@@ -1,5 +1,7 @@
 # Tapwave
 
+**Play it: [tapwave.onrender.com](https://tapwave.onrender.com)** — free hosting, so the first visit after a quiet spell takes about a minute while the server starts ([how it's deployed](#deployment)).
+
 A browser rhythm game in the circle-clicking genre: hit circles as their approach ring closes, follow sliders, spin spinners — keep the combo, keep your HP up. Scores go to a server-verified leaderboard.
 
 Tapwave is an original game. Its gameplay is inspired by the genre that osu! made popular, but it has its own name, visuals and generated maps, and it uses no assets from any other game. Its music is either synthesised live in the browser or openly licensed (CC0 / CC BY 4.0) — see [CREDITS.md](CREDITS.md).
@@ -136,7 +138,7 @@ The root `Dockerfile` builds the Angular app into the Spring Boot jar, so one se
    { printf 'DATABASE_URL_UNPOOLED='; neon connection-string --project-id <id>; } >> .env.local   # git-ignored
    ```
 2. **Render:** give the Render GitHub app access to this repository first (otherwise pushes don't redeploy), then *New → Blueprint* and pick it. Render reads `render.yaml` and asks for `DATABASE_URL`: paste the direct Neon connection string, `postgresql://user:password@host/db?sslmode=require`. `DatabaseUrlEnvironmentPostProcessor` turns it into Spring's JDBC URL, user and password (locally `DB_URL`, `DB_USER` and `DB_PASSWORD` still apply).
-3. On its first start the app runs the Flyway migrations and generates the maps. Every push to `main` redeploys.
+3. On its first start the app runs the Flyway migrations and generates the maps. It runs at [tapwave.onrender.com](https://tapwave.onrender.com), and every push to `main` redeploys.
 
 How it stays within the free tiers:
 
