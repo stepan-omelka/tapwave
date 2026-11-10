@@ -153,7 +153,7 @@ To check the production image locally: `docker buildx build --platform linux/amd
 ## Tests
 
 ```bash
-cd backend && ./mvnw test        # 55 tests: scoring, golden cases, generator (templates and onset placement), breaks and licensing rules, timing check, API round trip (Testcontainers), DATABASE_URL parsing, deep links
+cd backend && ./mvnw test        # 57 tests: scoring, golden cases, generator (templates and onset placement), breaks and licensing rules, timing check, API round trip (Testcontainers), DATABASE_URL parsing, deep links
 cd frontend && npm test          # 17 tests: golden cases, headless engine parity, intro skip, slider paths
 ```
 
