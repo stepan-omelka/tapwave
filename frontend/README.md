@@ -69,6 +69,7 @@ Open `/play/<id>?auto=1` to watch autoplay on a map. Everything else follows
 | `score-keeper.spec.ts`  | the scoring rules and every golden case shared with the backend                                            |
 | `engine.spec.ts`        | the real engine with a fake canvas and audio clock: autoplay and sloppy scripted players score the same live and recomputed; the intro skip |
 | `slider-path.spec.ts`   | slider curves and the ball's position along them                                                            |
+| `link-preview.spec.ts`  | the link-preview tags in `index.html` and the 1200 × 630 image they point at on the live domain              |
 
 - Run them once with `npx ng test --watch=false`.
 - Rendering, audio and input have no automated tests; check them by playing in a browser.
